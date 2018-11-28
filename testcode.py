@@ -3,10 +3,11 @@ from array import array
 from pickle import dump
 import os
 
-text = "aaaaabbbbbccccccccccddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffgggggggggg"
+#text = "aaaaabbbbbccccccccccddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffgggggggggg"
 
-text = "MOBY DICK; OR THE WHALE\nby Herman Melville\n\n\n\nETYMOLOGY.\n\n(Supplied by a Late Consumptive Usher to a Grammar School)\n\nThe pale Usher--threadbare in coat, heart, body, and brain; I see himnow.  He was ever dusting his old lexicons and grammars, with a queerhandkerchief, mockingly embellished with all the gay flags of all theknown nations of the world.  He loved to dust his old grammars; itsomehow mildly reminded him of his mortality."
-
+#text = "MOBY DICK; OR THE WHALE\nby Herman Melville\n\n\n\nETYMOLOGY.\n\n(Supplied by a Late Consumptive Usher to a Grammar School)\n\nThe pale Usher--threadbare in coat, heart, body, and brain; I see himnow.  He was ever dusting his old lexicons and grammars, with a queerhandkerchief, mockingly embellished with all the gay flags of all theknown nations of the world.  He loved to dust his old grammars; itsomehow mildly reminded him of his mortality."
+f = open('infile.txt','r')
+text = f.read()
 
 term = {} #initial the term vector
 for t in set(text):
@@ -16,6 +17,11 @@ freq = {key:len(term[key]) for key in term.keys()} #Counting each character
 total_freq = sum(freq.values())
 i=0 #initial number of brach
 new_freq = freq #For making Huffman tree
+EoFkey ='EoF_' #generate EoF to encode with text
+while EoFkey in new_freq:
+    EoFkey += '_' #make sure that EoFkey is not duplicate with text inside
+
+new_freq[EoFkey] = 1#add EoF in the vector
 table = {} #Initial encoding table
 
 while True:
@@ -73,26 +79,20 @@ table_encode(branch)
 for t in set(text):
     text = text.replace(t,table[t]) #change text to code
 
+
+table[True] = table[EoFkey]
+del table[EoFkey]
 #Adding EOF
-#generate EOF
-Maximum_bit_length = max([len(code) for code in table.values()])
-EoF = 2**(Maximum_bit_length-1) #Intial length of EoF
-while True:
-    if '{0:0b}'.format(EoF) not in table.values():#Finding the code of EoF which is not duplicate with any key in table.
-        break
-    EoF += 1
-table[0] = '{0:0b}'.format(EoF)
-text = text + table[0] # Adding the EoF at the start and the end of File
-#EoF + text + EoF
+
+text = text + table[True] # Adding the EoF at the start and the end of File
+
 
 codearray = array('B') #Initial array
 
 if len(text)%8 != 0:
     text = text + '0'*(8-len(text)%8) #Make them to be bytes
-    table[0] += '0'*(8-len(text)%8) #Complete EOF
 for i in range(0,len(text),8):
     codearray.append(int(text[i:i+8],2)) #Add data to the array
-
 try:
 	os.remove('infile.bin') #If the file already exist, delete the file
 except:
