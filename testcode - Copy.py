@@ -77,24 +77,23 @@ def table_encode(branch,code=''): #Getting the coding table from dictionary
 branch = list(branch.values())[0]
 table_encode(branch)
 #encoding text
-data = ''
-for t in text:
-    data += table[t] #change text to code
+for t in set(text):
+    text = text.replace(t,table[t]) #change text to code
 
 
 table[True] = table[EoFkey]
 del table[EoFkey]
 #Adding EOF
 
-data = data + table[True] # Adding the EoF at the start and the end of File
+text = text + table[True] # Adding the EoF at the start and the end of File
 
 
 codearray = array('B') #Initial array
 
-if len(data)%8 != 0:
-    data = data + '0'*(8-len(data)%8) #Make them to be bytes
-for i in range(0,len(data),8):
-    codearray.append(int(data[i:i+8],2)) #Add data to the array
+if len(text)%8 != 0:
+    text = text + '0'*(8-len(text)%8) #Make them to be bytes
+for i in range(0,len(text),8):
+    codearray.append(int(text[i:i+8],2)) #Add data to the array
 
 try:
 	os.remove('infile.bin') #If the file already exist, delete the file
@@ -113,7 +112,3 @@ except:
 pickle_out = open('infile-symbol-model.pkl','wb')
 dump(table,pickle_out)#Export the table
 pickle_out.close() #close file
-
-
-
-decode_table = {value:key for key,value in table.items()}
