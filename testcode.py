@@ -1,6 +1,13 @@
-import re
+import re,sys
+from array import array
+from pickle import dump
+import os
 
 text = "aaaaabbbbbccccccccccddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffgggggggggg"
+
+text = "MOBY DICK; OR THE WHALE\nby Herman Melville\n\n\n\nETYMOLOGY.\n\n(Supplied by a Late Consumptive Usher to a Grammar School)\n\nThe pale Usher--threadbare in coat, heart, body, and brain; I see himnow.  He was ever dusting his old lexicons and grammars, with a queerhandkerchief, mockingly embellished with all the gay flags of all theknown nations of the world.  He loved to dust his old grammars; itsomehow mildly reminded him of his mortality."
+
+
 term = {} #initial the term vector
 for t in set(text):
     term[t] = [i for i, x in enumerate(text) if x == t]
@@ -12,7 +19,7 @@ new_freq = freq #For making Huffman tree
 table = {} #Initial encoding table
 
 while True:
-    print(branch)
+    #print(branch)
     if (len(new_freq) < 2):
         break
     
@@ -64,8 +71,41 @@ branch = list(branch.values())[0]
 table_encode(branch)
 #encoding text
 for t in set(text):
-    text = text.replace(t,table[t])
-    
+    text = text.replace(t,table[t]) #change text to code
+
+#Adding EOF
+#generate EOF
+Maximum_bit_length = max([len(code) for code in table.values()])
+EoF = 2**(Maximum_bit_length-1) #Intial length of EoF
+while True:
+    if '{0:0b}'.format(EoF) not in table.values():#Finding the code of EoF which is not duplicate with any key in table.
+        break
+    EoF += 1
+table[0] = '{0:0b}'.format(EoF)
+text = text + table[0] # Adding the EoF at the start and the end of File
+#EoF + text + EoF
+
+codearray = array('B') #Initial array
+
+if len(text)%8 != 0:
+    text = text + '0'*(8-len(text)%8) #Make them to be bytes
+    table[0] += '0'*(8-len(text)%8) #Complete EOF
+for i in range(0,len(text),8):
+    codearray.append(int(text[i:i+8],2)) #Add data to the array
+
+try:
+	os.remove('infile.bin') #If the file already exist, delete the file
+except:
+	print('')
+f = open('infile.bin','w+b')
+codearray.tofile(f)
+f.close() #close file
 
 
-
+try:
+	os.remove('infile-symbol-model.pkl') #If the file already exist, delete the file
+except:
+	print('')
+pickle_out = open('infile-symbol-model.pkl','wb')
+dump(table,pickle_out)#Export the table
+pickle_out.close() #close file
