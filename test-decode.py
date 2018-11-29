@@ -29,6 +29,6 @@ try:
 	os.remove('helloworld.txt') #If the file already exist, delete the file
 except:
 	print('')
-f = open('outfile.txt','w')
+f = open('infile-decompressed.txt','w')
 f.write(output)
 f.close()

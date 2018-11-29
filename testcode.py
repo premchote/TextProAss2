@@ -21,7 +21,7 @@ new_freq = freq #For making Huffman tree
 print(new_freq['h'])
 EoFkey ='EoF_' #generate EoF to encode with text
 while EoFkey in new_freq:
-    EoFkey += '_' #make sure that EoFkey is not duplicate with text inside
+    EoFkey += '_' #make sure that EoFkey is not duplicate with any text inside
 
 new_freq[EoFkey] = 1#add EoF in the vector
 table = {} #Initial encoding table
@@ -57,7 +57,7 @@ while True:
                         1 : branch[list(new_freq.keys())[1]]
                     }
         del branch[list(new_freq.keys())[0]]
-        del branch[list(new_freq.keys())[1]] #Delete unused keys
+        del branch[list(new_freq.keys())[0]] #Delete unused keys
     new_freq[i] = list(new_freq.values())[0] +list(new_freq.values())[1] #Add branch to dict
     new_freq = {list(new_freq.keys())[i]:list(new_freq.values())[i] for i in range(2,len(new_freq))} #Delete 2 minimum
     i+=1
